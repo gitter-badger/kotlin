@@ -111,7 +111,7 @@ public abstract class AbstractLoadJavaTest extends TestCaseWithTmpdir {
         Assert.assertEquals("test", packageFromSource.getName().asString());
 
         PackageViewDescriptor packageFromBinary = LoadDescriptorUtil.loadTestPackageAndBindingContextFromJavaRoot(
-                tmpdir, getTestRootDisposable(), TestJdkKind.MOCK_JDK, configurationKind
+                tmpdir, getTestRootDisposable(), TestJdkKind.MOCK_JDK, configurationKind, true
         ).first;
 
         for (DeclarationDescriptor descriptor : packageFromBinary.getMemberScope().getAllDescriptors()) {
@@ -140,9 +140,10 @@ public abstract class AbstractLoadJavaTest extends TestCaseWithTmpdir {
         });
 
         CompilerConfiguration configuration = JetTestUtils.compilerConfigurationForTests(
-                ConfigurationKind.JDK_ONLY, TestJdkKind.MOCK_JDK, tmpdir);
+                ConfigurationKind.JDK_ONLY, TestJdkKind.MOCK_JDK);
         addKotlinSourceRoot(configuration, sourcesDir.getAbsolutePath());
         addJavaSourceRoot(configuration, new File("compiler/tests")); // for @ExpectLoadError annotation
+        addJavaSourceRoot(configuration, tmpdir);
         KotlinCoreEnvironment environment =
                 KotlinCoreEnvironment.createForTests(getTestRootDisposable(), configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES);
 
@@ -210,7 +211,7 @@ public abstract class AbstractLoadJavaTest extends TestCaseWithTmpdir {
         FileUtil.copy(originalJavaFile, new File(testPackageDir, originalJavaFile.getName()));
 
         Pair<PackageViewDescriptor, BindingContext> javaPackageAndContext = loadTestPackageAndBindingContextFromJavaRoot(
-                tmpdir, getTestRootDisposable(), TestJdkKind.MOCK_JDK, ConfigurationKind.JDK_ONLY
+                tmpdir, getTestRootDisposable(), TestJdkKind.MOCK_JDK, ConfigurationKind.JDK_ONLY, false
         );
 
         checkJavaPackage(expectedFile, javaPackageAndContext.first, javaPackageAndContext.second,
@@ -257,7 +258,7 @@ public abstract class AbstractLoadJavaTest extends TestCaseWithTmpdir {
             @NotNull ConfigurationKind configurationKind
     ) throws IOException {
         compileJavaWithAnnotationsJar(javaFiles, outDir);
-        return loadTestPackageAndBindingContextFromJavaRoot(outDir, myTestRootDisposable, TestJdkKind.MOCK_JDK, configurationKind);
+        return loadTestPackageAndBindingContextFromJavaRoot(outDir, myTestRootDisposable, TestJdkKind.MOCK_JDK, configurationKind, true);
     }
 
     private static void checkJavaPackage(
