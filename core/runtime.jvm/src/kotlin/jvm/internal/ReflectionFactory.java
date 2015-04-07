@@ -32,6 +32,10 @@ public class ReflectionFactory {
         throw error();
     }
 
+    public KClass[] foreignKotlinClasses(Class[] javaClasses) {
+        throw error();
+    }
+
     public KMemberProperty memberProperty(String name, KClass owner) {
         throw error();
     }

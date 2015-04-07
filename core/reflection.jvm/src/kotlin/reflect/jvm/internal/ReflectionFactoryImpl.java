@@ -40,6 +40,15 @@ public class ReflectionFactoryImpl extends ReflectionFactory {
     }
 
     @Override
+    public KClass[] foreignKotlinClasses(Class[] javaClasses) {
+        KClass[] kClasses = new KClass[javaClasses.length];
+        for (int i = 0; i < javaClasses.length; i++) {
+            kClasses[i] = foreignKotlinClass(javaClasses[i]);
+        }
+        return kClasses;
+    }
+
+    @Override
     public KMemberProperty memberProperty(String name, KClass owner) {
         return ((KClassImpl) owner).memberProperty(name);
     }
