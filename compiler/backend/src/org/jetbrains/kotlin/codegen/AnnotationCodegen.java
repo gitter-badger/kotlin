@@ -284,7 +284,17 @@ public abstract class AnnotationCodegen {
 
             @Override
             public Void visitJavaClassValue(JavaClassValue value, Void data) {
-                annotationVisitor.visit(name, typeMapper.mapType(value.getValue()));
+                return visitClassOfType(value.getValue());
+            }
+
+            @Override
+            public Void visitKClassValue(KClassValue value, Void data) {
+                return visitClassOfType(value.getValue());
+            }
+
+            private Void visitClassOfType(@Nullable JetType type) {
+                if (type == null) return null;
+                annotationVisitor.visit(name, typeMapper.mapType(type));
                 return null;
             }
 

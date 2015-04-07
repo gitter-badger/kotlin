@@ -532,4 +532,8 @@ public class DescriptorUtils {
             }
         }
     }
+
+    public static boolean isKClass(@NotNull ClassDescriptor classDescriptor) {
+        return "kotlin.reflect.KClass".equals(getFqName(classDescriptor).asString());
+    }
 }

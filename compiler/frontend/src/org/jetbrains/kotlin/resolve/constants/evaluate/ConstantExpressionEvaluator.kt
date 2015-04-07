@@ -395,6 +395,9 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
         return null
     }
 
+    override fun visitClassLiteralExpression(expression: JetClassLiteralExpression, expectedType: JetType?) =
+            KClassValue(trace.get(BindingContext.EXPRESSION_TYPE, expression))
+
     private fun resolveArguments(valueArguments: List<ValueArgument>, expectedType: JetType): List<CompileTimeConstant<*>> {
         val constants = arrayListOf<CompileTimeConstant<*>>()
         for (argument in valueArguments) {
