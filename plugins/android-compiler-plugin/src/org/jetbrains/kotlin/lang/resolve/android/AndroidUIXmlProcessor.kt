@@ -162,12 +162,12 @@ public abstract class AndroidUIXmlProcessor(protected val project: Project) {
     }
 
     private fun KotlinStringWriter.writeSyntheticProperty(receiver: String, widget: AndroidResource, stubCall: String) {
-        val cast = if (widget.className != "View") " as? ${widget.className}" else ""
+        val className = if (receiver.startsWith(AndroidConst.SUPPORT_V4_PACKAGE)) widget.supportClassName() else widget.className
+        val cast = if (widget.className != "View") " as? $className" else ""
         val body = arrayListOf("return $stubCall$cast")
-        val type = widget.className
         writeImmutableExtensionProperty(receiver,
                                         name = widget.id,
-                                        retType = "$EXPLICIT_FLEXIBLE_CLASS_NAME<$type, $type?>",
+                                        retType = "$EXPLICIT_FLEXIBLE_CLASS_NAME<$className, $className?>",
                                         getterBody = body)
     }
 
