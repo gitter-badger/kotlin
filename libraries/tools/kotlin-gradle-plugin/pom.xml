@@ -67,16 +67,6 @@
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-              <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>${project.build.outputDirectory}/../groovyOutput</directory>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -96,7 +86,6 @@
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                                <sourceDir>${project.build.outputDirectory}/../groovyOutput</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -166,7 +155,6 @@
                                     </includes>
                                 </fileset>
                             </sources>
-                            <outputDirectory>${project.build.outputDirectory}/../groovyOutput</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
