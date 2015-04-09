@@ -16,18 +16,18 @@
 
 package org.jetbrains.kotlin.idea.decompiler.stubBuilder
 
-import org.jetbrains.kotlin.serialization.deserialization.NameResolver
-import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.serialization.deserialization.ClassDataFinder
-import org.jetbrains.kotlin.serialization.ProtoBuf
-import org.jetbrains.kotlin.load.kotlin.KotlinClassFinder
-import org.jetbrains.kotlin.serialization.deserialization.ErrorReporter
 import org.jetbrains.kotlin.load.kotlin.AbstractBinaryClassAnnotationAndConstantLoader
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.storage.LockBasedStorageManager
+import org.jetbrains.kotlin.load.kotlin.KotlinClassFinder
 import org.jetbrains.kotlin.load.kotlin.KotlinJvmBinaryClass
-
+import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.serialization.ProtoBuf
+import org.jetbrains.kotlin.serialization.deserialization.ClassDataFinder
+import org.jetbrains.kotlin.serialization.deserialization.ErrorReporter
+import org.jetbrains.kotlin.serialization.deserialization.NameResolver
+import org.jetbrains.kotlin.serialization.jvm.JvmProtoBuf
+import org.jetbrains.kotlin.storage.LockBasedStorageManager
 
 class ClsStubBuilderComponents(
         val classDataFinder: ClassDataFinder,
@@ -92,9 +92,10 @@ class AnnotationLoaderForStubBuilder(
         errorReporter: ErrorReporter
 ) : AbstractBinaryClassAnnotationAndConstantLoader<ClassId, Unit>(
         LockBasedStorageManager.NO_LOCKS, kotlinClassFinder, errorReporter) {
-    override fun loadTypeAnnotations(type: ProtoBuf.Type, nameResolver: NameResolver): MutableList<ClassId> {
-        // TODO: support type annotations in cls stubs
-        throw UnsupportedOperationException()
+    override fun loadTypeAnnotations(type: ProtoBuf.Type, nameResolver: NameResolver): List<ClassId> {
+        return type.getExtension(JvmProtoBuf.typeAnnotation).map { annotation ->
+            nameResolver.getClassId(annotation.getId())
+        }
     }
 
     override fun loadConstant(desc: String, initializer: Any) = null
