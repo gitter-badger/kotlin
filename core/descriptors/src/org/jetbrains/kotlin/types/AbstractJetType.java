@@ -18,6 +18,8 @@ package org.jetbrains.kotlin.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor;
+import org.jetbrains.kotlin.renderer.DescriptorRenderer;
 import org.jetbrains.kotlin.types.checker.JetTypeChecker;
 
 import java.util.Iterator;
@@ -54,19 +56,36 @@ public abstract class AbstractJetType implements JetType {
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (AnnotationDescriptor annotation : getAnnotations()) {
+            sb.append("[");
+            sb.append(DescriptorRenderer.DEBUG_TEXT.renderAnnotation(annotation));
+            sb.append("] ");
+        }
+
+        sb.append(getConstructor());
+
         List<TypeProjection> arguments = getArguments();
-        return getConstructor() + (arguments.isEmpty() ? "" : "<" + argumentsToString(arguments) + ">") + (isMarkedNullable() ? "?" : "");
+        if (!arguments.isEmpty()) {
+            sb.append("<");
+            argumentsToString(sb, arguments);
+            sb.append(">");
+        }
+
+        if (isMarkedNullable()) {
+            sb.append("?");
+        }
+
+        return sb.toString();
     }
 
-    private static StringBuilder argumentsToString(List<TypeProjection> arguments) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Iterator<TypeProjection> iterator = arguments.iterator(); iterator.hasNext();) {
-            TypeProjection argument = iterator.next();
-            stringBuilder.append(argument);
+    private static void argumentsToString(StringBuilder sb, List<TypeProjection> arguments) {
+        for (Iterator<TypeProjection> iterator = arguments.iterator(); iterator.hasNext(); ) {
+            sb.append(iterator.next());
             if (iterator.hasNext()) {
-                stringBuilder.append(", ");
+                sb.append(", ");
             }
         }
-        return stringBuilder;
     }
 }

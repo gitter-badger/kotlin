@@ -419,6 +419,27 @@ public class JvmRuntimeDescriptorLoaderTestGenerated extends AbstractJvmRuntimeD
                     doTest(fileName);
                 }
             }
+
+            @TestMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types")
+            @TestDataPath("$PROJECT_ROOT")
+            @RunWith(JUnit3RunnerWithInners.class)
+            public static class Types extends AbstractJvmRuntimeDescriptorLoaderTest {
+                public void testAllFilesPresentInTypes() throws Exception {
+                    JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/loadJava/compiledKotlin/annotations/types"), Pattern.compile("^(.+)\\.kt$"), true);
+                }
+
+                @TestMetadata("SimpleTypeAnnotation.kt")
+                public void testSimpleTypeAnnotation() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types/SimpleTypeAnnotation.kt");
+                    doTest(fileName);
+                }
+
+                @TestMetadata("TypeAnnotationWithArguments.kt")
+                public void testTypeAnnotationWithArguments() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types/TypeAnnotationWithArguments.kt");
+                    doTest(fileName);
+                }
+            }
         }
 
         @TestMetadata("compiler/testData/loadJava/compiledKotlin/class")

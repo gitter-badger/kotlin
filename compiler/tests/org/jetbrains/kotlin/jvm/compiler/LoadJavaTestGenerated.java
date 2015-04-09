@@ -2244,6 +2244,27 @@ public class LoadJavaTestGenerated extends AbstractLoadJavaTest {
                     doTestCompiledKotlin(fileName);
                 }
             }
+
+            @TestMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types")
+            @TestDataPath("$PROJECT_ROOT")
+            @RunWith(JUnit3RunnerWithInners.class)
+            public static class Types extends AbstractLoadJavaTest {
+                public void testAllFilesPresentInTypes() throws Exception {
+                    JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/loadJava/compiledKotlin/annotations/types"), Pattern.compile("^(.+)\\.kt$"), true);
+                }
+
+                @TestMetadata("SimpleTypeAnnotation.kt")
+                public void testSimpleTypeAnnotation() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types/SimpleTypeAnnotation.kt");
+                    doTestCompiledKotlin(fileName);
+                }
+
+                @TestMetadata("TypeAnnotationWithArguments.kt")
+                public void testTypeAnnotationWithArguments() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/annotations/types/TypeAnnotationWithArguments.kt");
+                    doTestCompiledKotlin(fileName);
+                }
+            }
         }
 
         @TestMetadata("compiler/testData/loadJava/compiledKotlin/class")
