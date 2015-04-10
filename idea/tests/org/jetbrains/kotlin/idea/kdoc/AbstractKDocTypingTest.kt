@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.idea.JetLightProjectDescriptor
 import org.jetbrains.kotlin.test.InTextDirectivesUtils
 import org.jetbrains.kotlin.test.JetTestUtils
 
-public open class AbstractKDocTypingTest : JetLightCodeInsightFixtureTestCase() {
+public abstract class AbstractKDocTypingTest : JetLightCodeInsightFixtureTestCase() {
     override fun getTestDataPath(): String = JetTestUtils.getHomeDirectory()
     override fun getProjectDescriptor() = JetLightProjectDescriptor.INSTANCE
 
