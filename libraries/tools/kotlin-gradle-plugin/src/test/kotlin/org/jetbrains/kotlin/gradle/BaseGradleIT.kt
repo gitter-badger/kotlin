@@ -37,7 +37,7 @@ abstract class BaseGradleIT {
         copyDirRecursively(File(resourcesRootFile, "GradleWrapper-$wrapperVersion"), projectDir)
         val cmd = createCommand(tasks)
 
-        println("<=== Test build: ${this.projectName} $cmd ====>")
+        println("<=== Test build: ${this.projectName} $cmd ===>")
 
         val process = createProcess(cmd, projectDir)
 
@@ -46,25 +46,25 @@ abstract class BaseGradleIT {
     }
 
     fun CompiledProject.assertSuccessful(): CompiledProject {
-        assertEquals(0, resultCode, "Gradle build failed")
+        assertEquals(0, resultCode, "<== Gradle build failed but must be successful ==>")
         return this
     }
 
     fun CompiledProject.assertFailed(): CompiledProject {
-        assertNotEquals(0, resultCode, "Expected that Gradle build failed")
+        assertNotEquals(0, resultCode, "<== Expected that Gradle build failed ==>")
         return this
     }
 
     fun CompiledProject.assertContains(vararg expected: String): CompiledProject {
         for (str in expected) {
-            assertTrue(output.contains(str.normalize()), "Should contain '$str', actual output: $output")
+            assertTrue(output.contains(str.normalize()), "<== Should contain '$str', actual output: $output ==>")
         }
         return this
     }
 
     fun CompiledProject.assertNotContains(vararg expected: String): CompiledProject {
         for (str in expected) {
-            assertFalse(output.contains(str.normalize()), "Should not contain '$str', actual output: $output")
+            assertFalse(output.contains(str.normalize()), "<== Should not contain '$str', actual output: $output ==>")
         }
         return this
     }
@@ -72,31 +72,32 @@ abstract class BaseGradleIT {
     fun CompiledProject.fileInWorkingDir(path: String) = File(File(workingDir, project.projectName), path)
 
     fun CompiledProject.assertReportExists(pathToReport: String = ""): CompiledProject {
-        assertTrue(fileInWorkingDir(pathToReport).exists(), "The report [$pathToReport] does not exist.")
+        assertTrue(fileInWorkingDir(pathToReport).exists(), "<== The report [$pathToReport] does not exist. ==>")
         return this
     }
 
     fun CompiledProject.assertFileExists(path: String = ""): CompiledProject {
-        assertTrue(fileInWorkingDir(path).exists(), "The file [$path] does not exist.")
+        assertTrue(fileInWorkingDir(path).exists(), "<== The file [$path] does not exist. ==>")
         return this
     }
 
     fun CompiledProject.assertNoSuchFile(path: String = ""): CompiledProject {
-        assertFalse(fileInWorkingDir(path).exists(), "The file [$path] exists.")
+        assertFalse(fileInWorkingDir(path).exists(), "<== The file [$path] exists. ==>")
         return this
     }
 
     fun CompiledProject.assertFileContains(path: String, vararg expected: String): CompiledProject {
         val text = fileInWorkingDir(path).readText()
         expected.forEach {
-            assertTrue(text.contains(it), "$path should contain '$it', actual file contents:\n$text")
+            assertTrue(text.contains(it), "<== $path should contain '$it', actual file contents:\n$text ==>")
         }
         return this
     }
 
     private fun Project.createCommand(params: Array<out String>): List<String> {
         val pathToKotlinPlugin = "-PpathToKotlinPlugin=" + File("local-repo").getAbsolutePath()
-        val tailParameters = params + listOf(pathToKotlinPlugin, "--no-daemon", "--${minLogLevel.name().toLowerCase()}")
+        val tailParameters = params +
+                listOf(pathToKotlinPlugin, "--no-daemon", "--${minLogLevel.name().toLowerCase()}", "-Pkotlin.gradle.test=true")
 
         return if (isWindows())
             listOf("cmd", "/C", "gradlew.bat") + tailParameters
