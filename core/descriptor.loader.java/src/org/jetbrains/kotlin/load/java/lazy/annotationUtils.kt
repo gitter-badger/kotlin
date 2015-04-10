@@ -41,6 +41,7 @@ class LazyJavaAnnotations(
         return annotationDescriptors(jAnnotation)
     }
 
+    // Note: external annotations are not included here
     override fun iterator() = annotationOwner.getAnnotations().stream().map { annotationDescriptors(it) }.filterNotNull().iterator()
 
     override fun isEmpty() = !iterator().hasNext()

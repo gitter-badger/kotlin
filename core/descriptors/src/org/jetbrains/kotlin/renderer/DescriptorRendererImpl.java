@@ -42,10 +42,17 @@ import org.jetbrains.kotlin.utils.UtilsPackage;
 
 import java.util.*;
 
+import static kotlin.KotlinPackage.setOf;
 import static org.jetbrains.kotlin.resolve.DescriptorUtils.isCompanionObject;
 import static org.jetbrains.kotlin.types.TypeUtils.CANT_INFER_FUNCTION_PARAM_TYPE;
 
 public class DescriptorRendererImpl implements DescriptorRenderer {
+    private static final Set<FqName> EXCLUDED_TYPE_ANNOTATION_CLASSES = setOf(
+            new FqName("org.jetbrains.annotations.ReadOnly"),
+            new FqName("org.jetbrains.annotations.Mutable"),
+            new FqName("org.jetbrains.annotations.NotNull"),
+            new FqName("org.jetbrains.annotations.Nullable")
+    );
 
     private final Function1<JetType, JetType> typeNormalizer;
     private final NameShortness nameShortness;
@@ -538,12 +545,14 @@ public class DescriptorRendererImpl implements DescriptorRenderer {
     private void renderAnnotations(@NotNull Annotated annotated, @NotNull StringBuilder builder, boolean needBrackets) {
         if (!modifiers.contains(Modifier.ANNOTATIONS)) return;
 
+        Set<FqName> excluded = annotated instanceof JetType ? EXCLUDED_TYPE_ANNOTATION_CLASSES : excludedAnnotationClasses;
+
         StringBuilder annotationsBuilder = new StringBuilder();
         for (AnnotationDescriptor annotation : annotated.getAnnotations()) {
             ClassDescriptor annotationClass = (ClassDescriptor) annotation.getType().getConstructor().getDeclarationDescriptor();
             assert annotationClass != null;
 
-            if (!excludedAnnotationClasses.contains(DescriptorUtils.getFqNameSafe(annotationClass))) {
+            if (!excluded.contains(DescriptorUtils.getFqNameSafe(annotationClass))) {
                 annotationsBuilder.append(renderAnnotation(annotation)).append(" ");
             }
         }

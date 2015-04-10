@@ -4762,12 +4762,6 @@ public class LoadJavaTestGenerated extends AbstractLoadJavaTest {
                 doTestCompiledKotlin(fileName);
             }
 
-            @TestMetadata("platform.kt")
-            public void testPlatform() throws Exception {
-                String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/type/platform.kt");
-                doTestCompiledKotlin(fileName);
-            }
-
             @TestMetadata("String.kt")
             public void testString() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlin/type/String.kt");
@@ -4933,6 +4927,21 @@ public class LoadJavaTestGenerated extends AbstractLoadJavaTest {
             @TestMetadata("functionName.kt")
             public void testFunctionName() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlinWithStdlib/platformNames/functionName.kt");
+                doTestCompiledKotlinWithStdlib(fileName);
+            }
+        }
+
+        @TestMetadata("compiler/testData/loadJava/compiledKotlinWithStdlib/platformTypes")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class PlatformTypes extends AbstractLoadJavaTest {
+            public void testAllFilesPresentInPlatformTypes() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/loadJava/compiledKotlinWithStdlib/platformTypes"), Pattern.compile("^(.+)\\.kt$"), true);
+            }
+
+            @TestMetadata("jreSymbols.kt")
+            public void testJreSymbols() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/loadJava/compiledKotlinWithStdlib/platformTypes/jreSymbols.kt");
                 doTestCompiledKotlinWithStdlib(fileName);
             }
         }
