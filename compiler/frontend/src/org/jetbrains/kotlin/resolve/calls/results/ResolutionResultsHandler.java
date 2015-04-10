@@ -19,10 +19,12 @@ package org.jetbrains.kotlin.resolve.calls.results;
 import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.descriptors.CallableDescriptor;
+import org.jetbrains.kotlin.resolve.DescriptorUtils;
 import org.jetbrains.kotlin.resolve.OverrideResolver;
 import org.jetbrains.kotlin.resolve.calls.callUtil.CallUtilPackage;
 import org.jetbrains.kotlin.resolve.calls.context.CheckValueArgumentsMode;
 import org.jetbrains.kotlin.resolve.calls.model.MutableResolvedCall;
+import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall;
 import org.jetbrains.kotlin.resolve.calls.tasks.ResolutionTask;
 
 import java.util.Collection;
@@ -175,7 +177,7 @@ public class ResolutionResultsHandler {
             @NotNull Set<MutableResolvedCall<D>> candidates,
             boolean discriminateGenerics
     ) {
-        if (candidates.size() == 1) {
+        if (candidates.size() == 1 || allAnnotationConstructors(candidates)) {
             return OverloadResolutionResultsImpl.success(candidates.iterator().next());
         }
 
@@ -200,5 +202,10 @@ public class ResolutionResultsHandler {
         return OverloadResolutionResultsImpl.ambiguity(noOverrides);
     }
 
-
+    private static <D extends CallableDescriptor> boolean allAnnotationConstructors(Set<? extends ResolvedCall<D>> candidates) {
+        for (ResolvedCall candidate : candidates) {
+            if (!DescriptorUtils.isAnnotationClass(candidate.getCandidateDescriptor().getContainingDeclaration())) return false;
+        }
+        return true;
+    }
 }

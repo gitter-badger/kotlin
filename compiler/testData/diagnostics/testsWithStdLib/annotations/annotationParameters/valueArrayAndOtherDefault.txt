@@ -14,6 +14,7 @@ A(value = {}: kotlin.Array<out kotlin.String>, x = kotlin.Any.class: java.lang.C
 
 public final annotation class A : kotlin.Annotation {
     public constructor A(/*0*/ vararg value: kotlin.String /*kotlin.Array<out kotlin.String>*/, /*1*/ x: java.lang.Class<*> = ..., /*2*/ y: kotlin.Int = ...)
+    public constructor A(/*0*/ vararg value: kotlin.String /*kotlin.Array<out kotlin.String>*/, /*1*/ x: kotlin.reflect.KClass<*> = ..., /*2*/ y: kotlin.Int = ...)
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
     public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
