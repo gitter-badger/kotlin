@@ -48,6 +48,11 @@ public class JetRefactoringSupportProvider extends RefactoringSupportProvider {
     }
 
     @NotNull
+    public RefactoringActionHandler getIntroduceLambdaParameterHandler() {
+        return new KotlinIntroduceParameterHandler(true);
+    }
+
+    @NotNull
     public RefactoringActionHandler getIntroducePropertyHandler() {
         return new KotlinIntroducePropertyHandler();
     }

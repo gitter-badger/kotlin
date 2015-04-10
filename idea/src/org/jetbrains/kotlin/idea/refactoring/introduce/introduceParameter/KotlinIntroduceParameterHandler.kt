@@ -29,8 +29,10 @@ import com.intellij.psi.search.LocalSearchScope
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.idea.core.refactoring.JetNameSuggester
+import org.jetbrains.kotlin.idea.core.refactoring.isMultiLine
 import org.jetbrains.kotlin.idea.refactoring.JetNameValidatorImpl
 import org.jetbrains.kotlin.idea.refactoring.JetRefactoringBundle
 import org.jetbrains.kotlin.idea.refactoring.changeSignature.*
@@ -59,9 +61,11 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.scopes.JetScopeUtils
 import org.jetbrains.kotlin.types.JetType
 import java.util.Collections
+import kotlin.properties.Delegates
 import kotlin.test.fail
 
 public data class IntroduceParameterDescriptor(
+        val extractAsLambda: Boolean,
         val originalExpression: JetExpression,
         val callable: JetNamedDeclaration,
         val callableDescriptor: FunctionDescriptor,
@@ -103,22 +107,30 @@ public data class IntroduceParameterDescriptor(
                 }
                 .map { it.key }
     }
+
+    val initializer: JetExpression by Delegates.lazy {
+        if (extractAsLambda) {
+            val space = if (originalExpression.isMultiLine()) "\n" else " "
+            JetPsiFactory(callable).createExpression("{$space${originalExpression.getText()}$space}")
+        }
+        else originalExpression
+    }
 }
 
 fun IntroduceParameterDescriptor.performRefactoring(parametersToRemove: List<JetParameter> = this.parametersToRemove) {
     runWriteAction {
         JetPsiUtil.deleteElementWithDelimiters(addedParameter)
-        
+
         val config = object: JetChangeSignatureConfiguration {
             override fun configure(originalDescriptor: JetMethodDescriptor, bindingContext: BindingContext): JetMethodDescriptor {
                 return originalDescriptor.modify {
                     val parameters = callable.getValueParameters()
                     parametersToRemove.map { parameters.indexOf(it) }.sortDescending().forEach { removeParameter(it) }
-                    
+
                     val parameterInfo = JetParameterInfo(name = addedParameter.getName()!!,
-                                                         type = parameterType,
-                                                         defaultValueForCall = if (withDefaultValue) "" else originalExpression.getText(),
-                                                         defaultValueForParameter = if (withDefaultValue) originalExpression else null,
+                                                         type = null,
+                                                         defaultValueForCall = if (withDefaultValue) "" else initializer.getText(),
+                                                         defaultValueForParameter = if (withDefaultValue) initializer else null,
                                                          valOrVar = valVar)
                     parameterInfo.currentTypeText = addedParameter.getTypeReference()?.getText() ?: "Any"
                     addParameter(parameterInfo)
@@ -128,13 +140,14 @@ fun IntroduceParameterDescriptor.performRefactoring(parametersToRemove: List<Jet
             override fun performSilently(affectedFunctions: Collection<PsiElement>): Boolean = true
         }
         if (runChangeSignature(callable.getProject(), callableDescriptor, config, callable.analyze(), callable, INTRODUCE_PARAMETER)) {
-            val paramRef = JetPsiFactory(callable).createSimpleName(addedParameter.getName()!!)
-            occurrencesToReplace.forEach { it.replace(paramRef) }
+            val name = addedParameter.getName()!!
+            val replacement = JetPsiFactory(callable).createExpression(if (extractAsLambda) "$name()" else name)
+            occurrencesToReplace.forEach { it.replace(replacement) }
         }
     }
 }
 
-public open class KotlinIntroduceParameterHandler: KotlinIntroduceHandlerBase() {
+public open class KotlinIntroduceParameterHandler(val extractAsLambda: Boolean = false): KotlinIntroduceHandlerBase() {
     open fun configure(descriptor: IntroduceParameterDescriptor): IntroduceParameterDescriptor = descriptor
 
     private fun isObjectOrNonInnerClass(e: PsiElement): Boolean =
@@ -144,7 +157,7 @@ public open class KotlinIntroduceParameterHandler: KotlinIntroduceHandlerBase() 
         val context = expression.analyze()
 
         val expressionType = context[BindingContext.EXPRESSION_TYPE, expression]
-        if (expressionType.isUnit() || expressionType.isNothing()) {
+        if (!extractAsLambda && (expressionType.isUnit() || expressionType.isNothing())) {
             val message = JetRefactoringBundle.message(
                     "cannot.introduce.parameter.of.0.type",
                     IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(expressionType)
@@ -211,9 +224,10 @@ public open class KotlinIntroduceParameterHandler: KotlinIntroduceHandlerBase() 
                 null,
                 fun() {
                     val psiFactory = JetPsiFactory(project)
-                    
+
                     val renderedType = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(parameterType)
-                    val newParameter = psiFactory.createParameter("${suggestedNames.first()}: $renderedType")
+                    val typeToInsert = if (extractAsLambda) "() -> $renderedType" else renderedType
+                    val newParameter = psiFactory.createParameter("${suggestedNames.first()}: $typeToInsert")
 
                     val isTestMode = ApplicationManager.getApplication().isUnitTestMode()
                     val inplaceIsAvailable = editor.getSettings().isVariableInplaceRenameEnabled() && !isTestMode
@@ -245,7 +259,8 @@ public open class KotlinIntroduceParameterHandler: KotlinIntroduceHandlerBase() 
                     else newParameter
 
                     val introduceParameterDescriptor =
-                            configure(IntroduceParameterDescriptor(JetPsiUtil.deparenthesize(expression)!!,
+                            configure(IntroduceParameterDescriptor(extractAsLambda,
+                                                                   JetPsiUtil.deparenthesize(expression)!!,
                                                                    targetParent,
                                                                    functionDescriptor,
                                                                    addedParameter,

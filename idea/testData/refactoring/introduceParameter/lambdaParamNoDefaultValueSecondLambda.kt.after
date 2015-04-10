@@ -1,0 +1,10 @@
+// EXTRACT_AS_LAMBDA
+// WITH_DEFAULT_VALUE: false
+fun foo(s: () -> String, i: () -> Int): Int {
+    val t = i() * 2
+    return i() - t
+}
+
+fun test() {
+    foo({ "2" }) { a + 1 }
+}

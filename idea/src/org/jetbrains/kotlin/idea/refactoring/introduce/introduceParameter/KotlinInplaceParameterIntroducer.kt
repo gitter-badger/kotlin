@@ -16,6 +16,7 @@
 
 package org.jetbrains.kotlin.idea.refactoring.introduce.introduceParameter
 
+import com.intellij.codeInsight.template.TemplateBuilderImpl
 import com.intellij.codeInsight.template.impl.TemplateManagerImpl
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
@@ -45,10 +46,7 @@ import org.jetbrains.kotlin.idea.util.IdeDescriptorRenderers
 import org.jetbrains.kotlin.idea.util.application.executeCommand
 import org.jetbrains.kotlin.idea.util.application.runWriteAction
 import org.jetbrains.kotlin.idea.util.supertypes
-import org.jetbrains.kotlin.psi.JetExpression
-import org.jetbrains.kotlin.psi.JetParameter
-import org.jetbrains.kotlin.psi.JetPsiFactory
-import org.jetbrains.kotlin.psi.JetPsiUtil
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.getValueParameterList
 import org.jetbrains.kotlin.psi.psiUtil.getValueParameters
 import org.jetbrains.kotlin.psi.psiUtil.isAncestor
@@ -136,7 +134,7 @@ public class KotlinInplaceParameterIntroducer(
                     val parameterName = currentName ?: parameter.getName()
                     val parameterType = currentType ?: parameter.getTypeReference()!!.getText()
                     val modifier = if (valVar != JetValVar.None) "${valVar.name} " else ""
-                    val defaultValue = if (withDefaultValue) " = ${originalExpression.getText()}" else ""
+                    val defaultValue = if (withDefaultValue) " = ${initializer.getText()}" else ""
 
                     "$modifier$parameterName: $parameterType$defaultValue"
                 }
@@ -268,6 +266,18 @@ public class KotlinInplaceParameterIntroducer(
         myEditor.getDocument().addDocumentListener(myDocumentAdapter!!)
 
         return true
+    }
+
+    override fun addTypeReferenceVariable(builder: TemplateBuilderImpl) {
+        val typeReference = myDeclaration.getTypeReference()
+        val typeReferenceToEdit =
+                if (descriptor.extractAsLambda) {
+                    (typeReference!!.getTypeElement() as JetFunctionType).getReturnTypeReference()
+                }
+                else {
+                    typeReference
+                }
+        addTypeReferenceVariable(builder, typeReferenceToEdit)
     }
 
     override fun finish(success: Boolean) {

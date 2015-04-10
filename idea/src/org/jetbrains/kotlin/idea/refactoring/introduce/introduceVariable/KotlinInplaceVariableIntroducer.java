@@ -352,7 +352,10 @@ public class KotlinInplaceVariableIntroducer<D extends JetCallableDeclaration> e
     }
 
     protected void addTypeReferenceVariable(TemplateBuilderImpl builder) {
-        JetTypeReference typeReference = myDeclaration.getTypeReference();
+        addTypeReferenceVariable(builder, myDeclaration.getTypeReference());
+    }
+
+    protected void addTypeReferenceVariable(TemplateBuilderImpl builder, JetTypeReference typeReference) {
         if (typeReference != null) {
             builder.replaceElement(typeReference,
                                    TYPE_REFERENCE_VARIABLE_NAME,

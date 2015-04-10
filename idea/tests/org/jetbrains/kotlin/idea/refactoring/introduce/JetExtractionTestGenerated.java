@@ -2287,6 +2287,24 @@ public class JetExtractionTestGenerated extends AbstractJetExtractionTest {
             doIntroduceParameterTest(fileName);
         }
 
+        @TestMetadata("lambdaParamNoDefaultValue.kt")
+        public void testLambdaParamNoDefaultValue() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/introduceParameter/lambdaParamNoDefaultValue.kt");
+            doIntroduceParameterTest(fileName);
+        }
+
+        @TestMetadata("lambdaParamNoDefaultValueSecondLambda.kt")
+        public void testLambdaParamNoDefaultValueSecondLambda() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/introduceParameter/lambdaParamNoDefaultValueSecondLambda.kt");
+            doIntroduceParameterTest(fileName);
+        }
+
+        @TestMetadata("lambdaParamWithDefaultValue.kt")
+        public void testLambdaParamWithDefaultValue() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/introduceParameter/lambdaParamWithDefaultValue.kt");
+            doIntroduceParameterTest(fileName);
+        }
+
         @TestMetadata("localVar.kt")
         public void testLocalVar() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/introduceParameter/localVar.kt");
