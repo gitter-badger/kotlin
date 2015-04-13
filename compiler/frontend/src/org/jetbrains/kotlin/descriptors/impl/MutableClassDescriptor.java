@@ -44,13 +44,10 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
     private List<TypeParameterDescriptor> typeParameters;
     private Collection<JetType> supertypes = new ArrayList<JetType>();
 
-    private MutableClassDescriptor companionObjectDescriptor;
-
     private final Set<ConstructorDescriptor> constructors = Sets.newLinkedHashSet();
     private ConstructorDescriptor primaryConstructor;
 
     private final Set<CallableMemberDescriptor> declaredCallableMembers = Sets.newLinkedHashSet();
-    private final Set<CallableMemberDescriptor> allCallableMembers = Sets.newLinkedHashSet(); // includes fake overrides
     private final Set<PropertyDescriptor> properties = Sets.newLinkedHashSet();
     private final Set<SimpleFunctionDescriptor> functions = Sets.newLinkedHashSet();
 
@@ -95,12 +92,7 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
     @Nullable
     @Override
     public MutableClassDescriptor getCompanionObjectDescriptor() {
-        return companionObjectDescriptor;
-    }
-
-    public void setCompanionObjectDescriptor(@NotNull MutableClassDescriptor classObjectDescriptor) {
-        assert this.companionObjectDescriptor == null : "classObjectDescriptor already assigned in " + this;
-        this.companionObjectDescriptor = classObjectDescriptor;
+        return null;
     }
 
     @NotNull
@@ -110,13 +102,6 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
             annotations = new AnnotationsImpl(new ArrayList<AnnotationDescriptor>(0));
         }
         return annotations;
-    }
-
-    public void addAnnotations(@NotNull Iterable<AnnotationDescriptor> annotationsToAdd) {
-        List<AnnotationDescriptor> annotations = ((AnnotationsImpl) getAnnotations()).getAnnotationDescriptors();
-        for (AnnotationDescriptor annotationDescriptor : annotationsToAdd) {
-            annotations.add(annotationDescriptor);
-        }
     }
 
     public void setModality(@NotNull Modality modality) {
@@ -197,13 +182,6 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
         }
     }
 
-    public void addConstructorParametersToInitializersScope(@NotNull Collection<? extends VariableDescriptor> variables) {
-        WritableScope scope = getWritableScopeForInitializers();
-        for (VariableDescriptor variable : variables) {
-            scope.addVariableDescriptor(variable);
-        }
-    }
-
     @NotNull
     @Override
     public Set<ConstructorDescriptor> getConstructors() {
@@ -230,11 +208,6 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
     @NotNull
     public Set<CallableMemberDescriptor> getDeclaredCallableMembers() {
         return declaredCallableMembers;
-    }
-
-    @NotNull
-    public Set<CallableMemberDescriptor> getAllCallableMembers() {
-        return allCallableMembers;
     }
 
     public void setTypeParameterDescriptors(@NotNull List<TypeParameterDescriptor> typeParameters) {
@@ -306,25 +279,9 @@ public class MutableClassDescriptor extends ClassDescriptorBase implements Class
     }
 
     @NotNull
-    private WritableScope getScopeForMemberLookupAsWritableScope() {
-        // hack
-        return (WritableScope) scopeForMemberLookup;
-    }
-
-    @NotNull
     @Override
     public JetScope getStaticScope() {
         return staticScope;
-    }
-
-    public void lockScopes() {
-        getScopeForMemberLookupAsWritableScope().changeLockLevel(WritableScope.LockLevel.READING);
-        if (companionObjectDescriptor != null) {
-            companionObjectDescriptor.lockScopes();
-        }
-        scopeForSupertypeResolution.changeLockLevel(WritableScope.LockLevel.READING);
-        scopeForMemberResolution.changeLockLevel(WritableScope.LockLevel.READING);
-        getWritableScopeForInitializers().changeLockLevel(WritableScope.LockLevel.READING);
     }
 
     @Override
