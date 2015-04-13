@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.load.java.components.TypeUsage
 import org.jetbrains.kotlin.load.java.components.TypeUsage.*
 import org.jetbrains.kotlin.load.java.lazy.LazyJavaResolverContext
 import org.jetbrains.kotlin.load.java.lazy.TypeParameterResolver
-import org.jetbrains.kotlin.load.java.lazy.hasNotNullAnnotation
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.FLEXIBLE_LOWER_BOUND
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.FLEXIBLE_UPPER_BOUND
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.INFLEXIBLE
@@ -365,7 +364,9 @@ class LazyJavaTypeAttributes(
             TypeUsage.MEMBER_SIGNATURE_COVARIANT
     }
 
-    override val isMarkedNotNull: Boolean by c.storageManager.createLazyValue { c.hasNotNullAnnotation(annotationOwner) }
+    override val isMarkedNotNull: Boolean by c.storageManager.createLazyValue {
+        annotationOwner.findAnnotation(JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION) != null
+    }
 }
 
 // When these annotations appear on a declaration, they are copied to the _type_ of the declaration, becoming type annotations
