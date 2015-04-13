@@ -21,15 +21,20 @@ import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationsImpl
-import org.jetbrains.kotlin.load.java.JvmAnnotationNames
+import org.jetbrains.kotlin.load.java.JvmAnnotationNames.JETBRAINS_MUTABLE_ANNOTATION
+import org.jetbrains.kotlin.load.java.JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION
+import org.jetbrains.kotlin.load.java.JvmAnnotationNames.JETBRAINS_NULLABLE_ANNOTATION
+import org.jetbrains.kotlin.load.java.JvmAnnotationNames.JETBRAINS_READONLY_ANNOTATION
 import org.jetbrains.kotlin.load.java.components.TypeUsage
 import org.jetbrains.kotlin.load.java.components.TypeUsage.*
 import org.jetbrains.kotlin.load.java.lazy.LazyJavaResolverContext
 import org.jetbrains.kotlin.load.java.lazy.TypeParameterResolver
+import org.jetbrains.kotlin.load.java.lazy.descriptors.resolveAnnotation
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.FLEXIBLE_LOWER_BOUND
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.FLEXIBLE_UPPER_BOUND
 import org.jetbrains.kotlin.load.java.lazy.types.JavaTypeFlexibility.INFLEXIBLE
 import org.jetbrains.kotlin.load.java.structure.*
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.platform.JavaToKotlinClassMap
 import org.jetbrains.kotlin.resolve.jvm.PLATFORM_TYPES
 import org.jetbrains.kotlin.resolve.scopes.JetScope
@@ -346,41 +351,39 @@ enum class JavaTypeFlexibility {
 
 class LazyJavaTypeAttributes(
         c: LazyJavaResolverContext,
-        val annotationOwner: JavaAnnotationOwner,
+        private val annotationOwner: JavaAnnotationOwner,
         override val howThisTypeIsUsed: TypeUsage,
-        annotations: Annotations,
         override val allowFlexible: Boolean = true
 ): JavaTypeAttributes {
     override val typeAnnotations: Annotations by c.storageManager.createLazyValue {
         AnnotationsImpl(annotationsCopiedToTypes.map { fqName ->
-            annotations.findAnnotation(fqName)
+            annotationOwner.findAnnotation(fqName)?.let {
+                c.resolveAnnotation(it)
+            }
         }.filterNotNull())
     }
 
-    override val howThisTypeIsUsedAccordingToAnnotations: TypeUsage by c.storageManager.createLazyValue {
-        if (annotations.isMarkedReadOnly() && !annotations.isMarkedMutable())
-            TypeUsage.MEMBER_SIGNATURE_CONTRAVARIANT
-        else
-            TypeUsage.MEMBER_SIGNATURE_COVARIANT
-    }
+    override val howThisTypeIsUsedAccordingToAnnotations =
+            if (hasAnnotation(JETBRAINS_READONLY_ANNOTATION) && !hasAnnotation(JETBRAINS_MUTABLE_ANNOTATION))
+                TypeUsage.MEMBER_SIGNATURE_CONTRAVARIANT
+            else
+                TypeUsage.MEMBER_SIGNATURE_COVARIANT
 
-    override val isMarkedNotNull: Boolean by c.storageManager.createLazyValue {
-        annotationOwner.findAnnotation(JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION) != null
-    }
+    override val isMarkedNotNull = hasAnnotation(JETBRAINS_NOT_NULL_ANNOTATION)
+
+    private fun hasAnnotation(fqName: FqName) = annotationOwner.findAnnotation(fqName) != null
 }
 
 // When these annotations appear on a declaration, they are copied to the _type_ of the declaration, becoming type annotations
 private val annotationsCopiedToTypes = setOf(
-        JvmAnnotationNames.JETBRAINS_READONLY_ANNOTATION,
-        JvmAnnotationNames.JETBRAINS_MUTABLE_ANNOTATION,
-        JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION,
-        JvmAnnotationNames.JETBRAINS_NULLABLE_ANNOTATION
+        JETBRAINS_READONLY_ANNOTATION,
+        JETBRAINS_MUTABLE_ANNOTATION,
+        JETBRAINS_NOT_NULL_ANNOTATION,
+        JETBRAINS_NULLABLE_ANNOTATION
 )
 
-private fun Annotations.isMarkedReadOnly() = findAnnotation(JvmAnnotationNames.JETBRAINS_READONLY_ANNOTATION) != null
-private fun Annotations.isMarkedMutable() = findAnnotation(JvmAnnotationNames.JETBRAINS_MUTABLE_ANNOTATION) != null
-internal fun Annotations.isMarkedNotNull() = findAnnotation(JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION) != null
-internal fun Annotations.isMarkedNullable() = findAnnotation(JvmAnnotationNames.JETBRAINS_NULLABLE_ANNOTATION) != null
+internal fun Annotations.isMarkedNotNull() = findAnnotation(JETBRAINS_NOT_NULL_ANNOTATION) != null
+internal fun Annotations.isMarkedNullable() = findAnnotation(JETBRAINS_NULLABLE_ANNOTATION) != null
 
 fun TypeUsage.toAttributes(allowFlexible: Boolean = true) = object : JavaTypeAttributes {
     override val howThisTypeIsUsed: TypeUsage = this@toAttributes

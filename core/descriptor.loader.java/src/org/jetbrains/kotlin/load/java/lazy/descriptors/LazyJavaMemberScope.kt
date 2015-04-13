@@ -18,7 +18,6 @@ package org.jetbrains.kotlin.load.java.lazy.descriptors
 
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.descriptors.*
-import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.impl.PropertyDescriptorImpl
 import org.jetbrains.kotlin.descriptors.impl.ValueParameterDescriptorImpl
 import org.jetbrains.kotlin.load.java.components.ExternalSignatureResolver
@@ -109,10 +108,8 @@ public abstract class LazyJavaMemberScope(
             valueParameters: ResolvedValueParameters): MethodSignatureData
 
     fun resolveMethodToFunctionDescriptor(method: JavaMethod, record: Boolean = true): JavaMethodDescriptor {
-
-        val annotations = c.resolveAnnotations(method)
         val functionDescriptorImpl = JavaMethodDescriptor.createJavaMethod(
-                containingDeclaration, annotations, method.getName(), c.sourceElementFactory.source(method)
+                containingDeclaration, c.resolveAnnotations(method), method.getName(), c.sourceElementFactory.source(method)
         )
 
         val c = c.child(functionDescriptorImpl, method)
@@ -121,7 +118,7 @@ public abstract class LazyJavaMemberScope(
         val valueParameters = resolveValueParameters(c, functionDescriptorImpl, method.getValueParameters())
 
         val annotationMethod = method.getContainingClass().isAnnotationType()
-        val returnTypeAttrs = LazyJavaTypeAttributes(c, method, TypeUsage.MEMBER_SIGNATURE_COVARIANT, annotations, allowFlexible = !annotationMethod)
+        val returnTypeAttrs = LazyJavaTypeAttributes(c, method, TypeUsage.MEMBER_SIGNATURE_COVARIANT, allowFlexible = !annotationMethod)
         val returnJavaType = method.getReturnType() ?: throw IllegalStateException("Constructor passed as method: $method")
         // Annotation arguments are never null in Java
         val returnType = c.typeResolver.transformJavaType(returnJavaType, returnTypeAttrs).let {
@@ -163,8 +160,7 @@ public abstract class LazyJavaMemberScope(
         val descriptors = jValueParameters.withIndex().map { pair ->
             val (index, javaParameter) = pair
 
-            val annotations = c.resolveAnnotations(javaParameter)
-            val typeUsage = LazyJavaTypeAttributes(c, javaParameter, TypeUsage.MEMBER_SIGNATURE_CONTRAVARIANT, annotations)
+            val typeUsage = LazyJavaTypeAttributes(c, javaParameter, TypeUsage.MEMBER_SIGNATURE_CONTRAVARIANT)
             val (outType, varargElementType) =
                     if (javaParameter.isVararg()) {
                         val paramType = javaParameter.getType() as? JavaArrayType
@@ -196,7 +192,7 @@ public abstract class LazyJavaMemberScope(
                     function,
                     null,
                     index,
-                    annotations,
+                    c.resolveAnnotations(javaParameter),
                     name,
                     outType,
                     false,
@@ -235,7 +231,7 @@ public abstract class LazyJavaMemberScope(
         val propertyDescriptor = createPropertyDescriptor(field)
         propertyDescriptor.initialize(null, null)
 
-        val propertyType = getPropertyType(field, propertyDescriptor.getAnnotations())
+        val propertyType = getPropertyType(field)
         val effectiveSignature = c.externalSignatureResolver.resolveAlternativeFieldSignature(field, propertyType, isVar)
         val signatureErrors = effectiveSignature.getErrors()
         if (!signatureErrors.isEmpty()) {
@@ -266,7 +262,7 @@ public abstract class LazyJavaMemberScope(
                                       c.sourceElementFactory.source(field))
     }
 
-    private fun getPropertyType(field: JavaField, annotations: Annotations): JetType {
+    private fun getPropertyType(field: JavaField): JetType {
         // Fields do not have their own generic parameters
         val finalStatic = field.isFinal() && field.isStatic()
 
@@ -274,7 +270,7 @@ public abstract class LazyJavaMemberScope(
         val allowFlexible = PLATFORM_TYPES && !(finalStatic && c.javaPropertyInitializerEvaluator.isNotNullCompileTimeConstant(field))
         val propertyType = c.typeResolver.transformJavaType(
                 field.getType(),
-                LazyJavaTypeAttributes(c, field, TypeUsage.MEMBER_SIGNATURE_INVARIANT, annotations, allowFlexible)
+                LazyJavaTypeAttributes(c, field, TypeUsage.MEMBER_SIGNATURE_INVARIANT, allowFlexible)
         )
         if ((!allowFlexible || !PLATFORM_TYPES) && finalStatic) {
             return TypeUtils.makeNotNullable(propertyType)
