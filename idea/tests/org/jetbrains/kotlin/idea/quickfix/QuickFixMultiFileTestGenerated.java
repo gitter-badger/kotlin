@@ -878,6 +878,45 @@ public class QuickFixMultiFileTestGenerated extends AbstractQuickFixMultiFileTes
                 doTestWithExtraFile(fileName);
             }
         }
+
+        @TestMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class ReplaceJavaClassWithKClass extends AbstractQuickFixMultiFileTest {
+            public void testAllFilesPresentInReplaceJavaClassWithKClass() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/quickfix/migration/replaceJavaClassWithKClass"), Pattern.compile("^(\\w+)\\.before\\.Main\\.kt$"), true);
+            }
+
+            @TestMetadata("basicMultiple.before.Main.kt")
+            public void testBasicMultiple() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass/basicMultiple.before.Main.kt");
+                doTestWithExtraFile(fileName);
+            }
+
+            @TestMetadata("implicitParameterMultiple.before.Main.kt")
+            public void testImplicitParameterMultiple() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass/implicitParameterMultiple.before.Main.kt");
+                doTestWithExtraFile(fileName);
+            }
+
+            @TestMetadata("manyFilesMultiple.before.Main.kt")
+            public void testManyFilesMultiple() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass/manyFilesMultiple.before.Main.kt");
+                doTestWithExtraFile(fileName);
+            }
+
+            @TestMetadata("severalArgsMultiple.before.Main.kt")
+            public void testSeveralArgsMultiple() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass/severalArgsMultiple.before.Main.kt");
+                doTestWithExtraFile(fileName);
+            }
+
+            @TestMetadata("valueAsVarargMultiple.before.Main.kt")
+            public void testValueAsVarargMultiple() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/quickfix/migration/replaceJavaClassWithKClass/valueAsVarargMultiple.before.Main.kt");
+                doTestWithExtraFile(fileName);
+            }
+        }
     }
 
     @TestMetadata("idea/testData/quickfix/modifiers")

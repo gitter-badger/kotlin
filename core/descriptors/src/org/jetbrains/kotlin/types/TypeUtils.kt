@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.types.isDynamic
 import org.jetbrains.kotlin.types.TypeProjection
 import org.jetbrains.kotlin.types.TypeProjectionImpl
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
+import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.types.DelegatingType
 
 private fun JetType.getContainedTypeParameters(): Collection<TypeParameterDescriptor> {
@@ -83,4 +84,11 @@ fun JetType.replaceAnnotations(newAnnotations: Annotations): JetType {
 
         override fun getAnnotations() = newAnnotations
     }
+}
+
+public fun JetType.isJavaLangClass(): Boolean {
+    val classifier = getConstructor().getDeclarationDescriptor()
+
+    if (classifier !is ClassDescriptor) return false
+    return DescriptorUtils.isJavaLangClass(classifier)
 }
