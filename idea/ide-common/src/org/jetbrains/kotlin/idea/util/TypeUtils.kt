@@ -16,15 +16,16 @@
 
 package org.jetbrains.kotlin.idea.util
 
-import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.resolve.jvm.kotlinSignature.CollectionClassMapping
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
 import org.jetbrains.kotlin.idea.imports.canBeReferencedViaImport
 import org.jetbrains.kotlin.load.java.JvmAnnotationNames
+import org.jetbrains.kotlin.load.java.JvmAnnotationNames.*
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.jvm.kotlinSignature.CollectionClassMapping
 import org.jetbrains.kotlin.resolve.scopes.JetScope
-import java.util.LinkedHashSet
+import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.typeUtil.substitute
 
 fun JetType.makeNullable() = TypeUtils.makeNullable(this)
@@ -63,20 +64,12 @@ public fun approximateFlexibleTypes(jetType: JetType, outermost: Boolean = true)
     )
 }
 
-private fun JetType.isMarkedReadOnly() = getAnnotations().findAnnotation(JvmAnnotationNames.JETBRAINS_READONLY_ANNOTATION) != null
-private fun JetType.isMarkedNotNull() = getAnnotations().findAnnotation(JvmAnnotationNames.JETBRAINS_NOT_NULL_ANNOTATION) != null
+private fun JetType.isMarkedReadOnly() = hasAnnotationMaybeExternal(JETBRAINS_READONLY_ANNOTATION)
+private fun JetType.isMarkedNotNull() = hasAnnotationMaybeExternal(JETBRAINS_NOT_NULL_ANNOTATION)
 
-public fun JetType.getAllReferencedTypes(): Set<JetType> {
-    val types = LinkedHashSet<JetType>()
-
-    fun addType(type: JetType) {
-        types.add(type)
-        type.getArguments().forEach { addType(it.getType()) }
-    }
-
-    addType(this)
-    return types
-}
+private fun JetType.hasAnnotationMaybeExternal(fqName: FqName) = with (getAnnotations()) {
+    findAnnotation(fqName) ?: findExternalAnnotation(fqName)
+} != null
 
 public enum class TypeNullability {
     NOT_NULL

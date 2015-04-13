@@ -24,16 +24,31 @@ import org.jetbrains.kotlin.name.FqName
 
 class LazyJavaAnnotations(
         private val c: LazyJavaResolverContext,
-        val annotationOwner: JavaAnnotationOwner
+        private val annotationOwner: JavaAnnotationOwner,
+        private val fqNameFilter: (FqName) -> Boolean = { true }
 ) : Annotations {
     private val annotationDescriptors = c.storageManager.createMemoizedFunctionWithNullableValues {
         annotation: JavaAnnotation ->
         c.resolveAnnotation(annotation)
     }
 
-    override fun findAnnotation(fqName: FqName) = annotationOwner.findAnnotation(fqName)?.let(annotationDescriptors)
+    override fun findAnnotation(fqName: FqName) =
+            if (!fqNameFilter(fqName)) null
+            else annotationOwner.findAnnotation(fqName)?.let(annotationDescriptors)
 
-    override fun iterator() = annotationOwner.getAnnotations().sequence().map(annotationDescriptors).filterNotNull().iterator()
+    override fun findExternalAnnotation(fqName: FqName) =
+            if (!fqNameFilter(fqName)) null
+            else c.externalAnnotationResolver.findExternalAnnotation(annotationOwner, fqName)?.let(annotationDescriptors)
+
+    override fun iterator() = annotationOwner.getAnnotations()
+            .sequence()
+            .filter { annotation ->
+                val classId = annotation.getClassId()
+                classId != null && fqNameFilter(classId.asSingleFqName())
+            }
+            .map(annotationDescriptors)
+            .filterNotNull()
+            .iterator()
 
     override fun isEmpty() = !iterator().hasNext()
 }
