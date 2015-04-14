@@ -33,12 +33,12 @@ import org.jetbrains.kotlin.lang.resolve.android.CliAndroidUIXmlProcessor
 
 private class AndroidTestExternalDeclarationsProvider(
         val project: Project,
-        val resPath: String,
+        val resPaths: List<String>,
         val manifestPath: String,
         val supportV4: Boolean
 ) : ExternalDeclarationsProvider {
     override fun getExternalDeclarations(moduleInfo: ModuleInfo?): Collection<JetFile> {
-        val parser = CliAndroidUIXmlProcessor(project, manifestPath, resPath)
+        val parser = CliAndroidUIXmlProcessor(project, manifestPath, resPaths)
         parser.supportV4 = supportV4
         return parser.parseToPsi() ?: listOf()
     }
@@ -46,15 +46,15 @@ private class AndroidTestExternalDeclarationsProvider(
 
 fun UsefulTestCase.createAndroidTestEnvironment(
         configuration: CompilerConfiguration,
-        resPath: String,
+        resPaths: List<String>,
         manifestPath: String,
         supportV4: Boolean
 ): KotlinCoreEnvironment {
-    configuration.put(AndroidConfigurationKeys.ANDROID_RES_PATH, resPath)
+    configuration.put(AndroidConfigurationKeys.ANDROID_RES_PATH, resPaths)
     configuration.put(AndroidConfigurationKeys.ANDROID_MANIFEST, manifestPath)
     val myEnvironment = KotlinCoreEnvironment.createForTests(getTestRootDisposable()!!, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
     val project = myEnvironment.project
-    ExternalDeclarationsProvider.registerExtension(project, AndroidTestExternalDeclarationsProvider(project, resPath, manifestPath, supportV4))
+    ExternalDeclarationsProvider.registerExtension(project, AndroidTestExternalDeclarationsProvider(project, resPaths, manifestPath, supportV4))
     ExpressionCodegenExtension.registerExtension(project, AndroidExpressionCodegenExtension())
     return myEnvironment
 }

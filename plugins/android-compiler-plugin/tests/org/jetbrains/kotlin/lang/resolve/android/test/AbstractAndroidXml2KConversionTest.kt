@@ -34,7 +34,8 @@ public abstract class AbstractAndroidXml2KConversionTest : UsefulTestCase() {
         val testDirectory = File(path)
 
         val jetCoreEnvironment = getEnvironment()
-        val parser = CliAndroidUIXmlProcessor(jetCoreEnvironment.project, path + "AndroidManifest.xml", path + "/res")
+        val resPaths = File(path).listFiles { it.name.startsWith("res") && it.isDirectory() }!!.map { "$path/${it.name}" }
+        val parser = CliAndroidUIXmlProcessor(jetCoreEnvironment.project, path + "AndroidManifest.xml", resPaths)
         parser.supportV4 = testDirectory.name.startsWith("support")
 
         val actual = parser.parse(false).toMap { it.name }

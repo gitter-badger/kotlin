@@ -58,7 +58,7 @@ public fun nameToIdDeclaration(name: String): String = AndroidConst.ID_DECLARATI
 
 public fun idToName(id: String): String? {
     for (prefix in AndroidConst.XML_ID_PREFIXES) {
-        if (id.startsWith(prefix)) return escapeAndroidIdentifier(id.substring(prefix.length()))
+        if (id.startsWith(prefix)) return escapeAndroidIdentifier(id.replace(prefix, ""))
     }
     return null
 }
