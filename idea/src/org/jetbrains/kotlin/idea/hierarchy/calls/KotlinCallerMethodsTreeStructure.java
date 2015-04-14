@@ -208,6 +208,7 @@ public class KotlinCallerMethodsTreeStructure extends KotlinCallTreeStructure {
 
                 PsiElement refElement = ref.getElement();
                 if (PsiTreeUtil.getParentOfType(refElement, JetImportDirective.class, true) != null) return true;
+                if (PsiTreeUtil.getParentOfType(refElement, JetDelegatorToSuperClass.class, true) != null) return true;
 
                 PsiElement element = HierarchyUtils.getCallHierarchyElement(refElement);
 

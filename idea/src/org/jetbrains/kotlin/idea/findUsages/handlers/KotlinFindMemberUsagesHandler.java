@@ -27,6 +27,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.PsiElementProcessor;
 import com.intellij.psi.search.PsiElementProcessorAdapter;
 import com.intellij.psi.search.searches.MethodReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.Processor;
@@ -168,6 +169,7 @@ public abstract class KotlinFindMemberUsagesHandler<T extends JetNamedDeclaratio
                                   : null;
                         if (psiMethod != null) {
                             for (PsiReference ref : MethodReferencesSearch.search(psiMethod, options.searchScope, true)) {
+                                if (PsiTreeUtil.getParentOfType(ref.getElement(), JetDelegatorToSuperClass.class, true) != null) continue;
                                 processUsage(uniqueProcessor, ref.getElement());
                             }
                         }
