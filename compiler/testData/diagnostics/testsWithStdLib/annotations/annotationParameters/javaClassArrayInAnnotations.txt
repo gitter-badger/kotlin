@@ -1,8 +1,8 @@
 package
 
 public final annotation class A : kotlin.Annotation {
-    public constructor A(/*0*/ vararg value: java.lang.Class<*> /*kotlin.Array<out java.lang.Class<*>>*/ = ..., /*1*/ arg: kotlin.Array<java.lang.Class<*>> = ...)
-    public constructor A(/*0*/ vararg value: kotlin.reflect.KClass<*> /*kotlin.Array<out kotlin.reflect.KClass<*>>*/ = ..., /*1*/ arg: kotlin.Array<kotlin.reflect.KClass<*>> = ...)
+    public constructor A(/*0*/ vararg value: java.lang.Class<*> /*kotlin.Array<out java.lang.Class<*>>*/ = ..., /*1*/ arg: kotlin.Array<out java.lang.Class<*>> = ...)
+    public constructor A(/*0*/ vararg value: kotlin.reflect.KClass<*> /*kotlin.Array<out kotlin.reflect.KClass<*>>*/ = ..., /*1*/ arg: kotlin.Array<out kotlin.reflect.KClass<*>> = ...)
     public abstract fun arg(): kotlin.Array<kotlin.reflect.KClass<*>>
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
@@ -10,7 +10,7 @@ public final annotation class A : kotlin.Annotation {
     public abstract fun value(): kotlin.Array<kotlin.reflect.KClass<*>>
 }
 
-A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<*>>, value = {kotlin.Int.class, kotlin.Any.class}: kotlin.Array<out java.lang.Class<*>>) internal final class MyClass1 {
+A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<out kotlin.Comparable<out kotlin.Any?>>>, value = {kotlin.Int.class, kotlin.Any.class}: kotlin.Array<out java.lang.Class<*>>) internal final class MyClass1 {
     public constructor MyClass1()
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
@@ -24,7 +24,7 @@ A(value = {kotlin.Int.class, kotlin.Any.class}: kotlin.Array<out java.lang.Class
     public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
 }
 
-A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<*>>) internal final class MyClass3 {
+A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<out kotlin.Comparable<out kotlin.Any?>>>) internal final class MyClass3 {
     public constructor MyClass3()
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
@@ -38,7 +38,7 @@ A() internal final class MyClass4 {
     public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
 }
 
-A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<*>>, value = {kotlin.Int.class, kotlin.Any.class}: kotlin.Array<java.lang.Class<out kotlin.Any>>) internal final class MyClass5 {
+A(arg = {kotlin.String.class, kotlin.Double.class}: kotlin.Array<java.lang.Class<out kotlin.Comparable<out kotlin.Any?>>>, value = {kotlin.Int.class, kotlin.Any.class}: kotlin.Array<java.lang.Class<out kotlin.Any>>) internal final class MyClass5 {
     public constructor MyClass5()
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
