@@ -25,8 +25,6 @@ import org.jetbrains.kotlin.completion.util.testCompletion
 import java.io.File
 
 public abstract class AbstractAndroidCompletionTest : KotlinAndroidTestCase() {
-    private var kotlinInternalModeOriginalValue: Boolean = false
-
     private var codeCompletionOldValue: Boolean = false
     private var smartTypeCompletionOldValue: Boolean = false
 
